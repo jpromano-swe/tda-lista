@@ -1,6 +1,6 @@
 package lista
 
-//TODO Juan: func Insertar() lista, pruebas
+//TODO Juan: faltan pruebas
 //TODO Ramiro: funciones de lista, func VerActual() del iterador, func Borrar() lista, pruebas
 
 type ListaEnlazada[T any] struct {
@@ -28,7 +28,8 @@ func crearNodo[T any](elem T) *nodo[T] {
   return &nuevoNodo
 }
 
-/* TODO IMPLEMENTAR FUNCIONES DE LISTA
+/*
+	TODO IMPLEMENTAR FUNCIONES DE LISTA
 
 func EstaVacia()
 func InsertarPrimero()
@@ -44,7 +45,7 @@ func (lista ListaEnlazada[T]) VerUltimo() T {
   return lista.ultimo.dato
 }
 
-func (lista ListaEnlazada[T]) InsertarUltimo(elem T) {
+func (lista *ListaEnlazada[T]) InsertarUltimo(elem T) {
   nodoNuevo := crearNodo(elem)
   if lista.EstaVacia() {
     lista.primero = nodoNuevo
@@ -54,14 +55,29 @@ func (lista ListaEnlazada[T]) InsertarUltimo(elem T) {
   lista.largo++
 }
 
-/* TODO IMPLEMENTAR FUNCIONES DE ITERADOR
+/*TODO IMPLEMENTAR FUNCIONES DE ITERADOR
 
-func VerActual() T
-func Borrar() T
+func VerActual() T{
+
+}
+func Borrar() T{
+
+}
 */
 
-func (lista *ListaEnlazada[T]) CrearIteradorExterno() *Iterador[T] {
+func (lista *ListaEnlazada[T]) Iterador() IteradorLista[T] {
   return &Iterador[T]{nodoAnterior: nil, nodoActual: lista.primero, lista: lista}
+}
+
+func (lista *ListaEnlazada[T]) Iterar(visitar func(T) bool) {
+  nodoActual := lista.primero
+
+  for nodoActual != nil {
+    if !visitar(nodoActual.dato) {
+      return
+    }
+    nodoActual = nodoActual.siguiente
+  }
 }
 
 func (iterador *Iterador[T]) HayAlgoMas() bool {
@@ -80,16 +96,15 @@ func (iterador *Iterador[T]) Insertar(elem T) {
   nodoNuevo := crearNodo(elem)
 
   if iterador.nodoAnterior == nil {
-    iterador.insertarAlPrincipiodeLista(nodoNuevo)
+    iterador.insertarAlPrincipioDeLista(nodoNuevo)
   } else {
     iterador.insertarDespuesDeNodoAnterior(nodoNuevo)
   }
   iterador.nodoActual = nodoNuevo
   iterador.lista.largo++
-
 }
 
-func (iterador *Iterador[T]) insertarAlPrincipiodeLista(nodoNuevo *nodo[T]) {
+func (iterador *Iterador[T]) insertarAlPrincipioDeLista(nodoNuevo *nodo[T]) {
   nodoNuevo.siguiente = iterador.lista.primero
   iterador.lista.primero = nodoNuevo
 
