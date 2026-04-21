@@ -43,14 +43,12 @@ func (lista ListaEnlazada[T]) EstaVacia() bool {
 func (lista *ListaEnlazada[T]) InsertarPrimero(elem T) {
 	nuevoNodo := crearNodo(elem)
 	if lista.EstaVacia() {
-		lista.primero = nuevoNodo
 		lista.ultimo = nuevoNodo
-		lista.largo = 1
-		return
+	} else {
+		nuevoNodo.siguiente = lista.primero
 	}
-	nuevoNodo.siguiente = lista.primero.siguiente
 	lista.primero = nuevoNodo
-	lista.largo += 1
+	lista.largo++
 }
 
 func (lista *ListaEnlazada[T]) BorrarPrimero() T {
@@ -58,14 +56,14 @@ func (lista *ListaEnlazada[T]) BorrarPrimero() T {
 		panic("La lista esta vacia")
 	}
 	aux := lista.primero.dato
-	if lista.largo < 1 {
+
+	if lista.primero == lista.ultimo {
+		lista.primero = nil
+		lista.ultimo = nil
+	} else {
 		lista.primero = lista.primero.siguiente
-		lista.largo -= 1
-		return aux
 	}
-	lista.primero = nil
-	lista.ultimo = nil
-	lista.largo -= 1
+	lista.largo--
 	return aux
 }
 
@@ -91,21 +89,13 @@ func (lista *ListaEnlazada[T]) InsertarUltimo(elem T) {
 	nodoNuevo := crearNodo(elem)
 	if lista.EstaVacia() {
 		lista.primero = nodoNuevo
+		lista.ultimo = nodoNuevo
+	} else {
+		lista.ultimo.siguiente = nodoNuevo
+		lista.ultimo = nodoNuevo
 	}
-	lista.ultimo.siguiente = nodoNuevo
-	lista.ultimo = nodoNuevo
 	lista.largo++
 }
-
-/*TODO IMPLEMENTAR FUNCIONES DE ITERADOR
-
-func VerActual() T{
-
-}
-func Borrar() T{
-
-}
-*/
 
 func (lista *ListaEnlazada[T]) Iterador() IteradorLista[T] {
 	return &Iterador[T]{nodoAnterior: nil, nodoActual: lista.primero, lista: lista}
@@ -154,29 +144,29 @@ func (iterador *Iterador[T]) VerActual() T {
 }
 
 func (iterador *Iterador[T]) Borrar() T {
-  if !iterador.HayAlgoMas() {
-    panic("El iterador termino de iterar")
-  }
-  
-  aux := iterador.nodoActual.dato
+	if !iterador.HayAlgoMas() {
+		panic("El iterador termino de iterar")
+	}
 
-  if iterador.lista.primero == iterador.lista.ultimo {
-    iterador.lista.primero = nil
-    iterador.lista.ultimo = nil
-    iterador.nodoActual = nil
-  } else if iterador.nodoAnterior == nil { 
-    iterador.lista.primero = iterador.nodoActual.siguiente
-    iterador.nodoActual = iterador.lista.primero
-  } else if iterador.nodoActual.siguiente == nil {
-    iterador.lista.ultimo = iterador.nodoAnterior
-    iterador.nodoAnterior.siguiente = nil
-    iterador.nodoActual = nil
-  } else {
-    iterador.nodoAnterior.siguiente = iterador.nodoActual.siguiente
-    iterador.nodoActual = iterador.nodoActual.siguiente
-  }
-  iterador.lista.largo -= 1
-  return aux
+	aux := iterador.nodoActual.dato
+
+	if iterador.lista.primero == iterador.lista.ultimo {
+		iterador.lista.primero = nil
+		iterador.lista.ultimo = nil
+		iterador.nodoActual = nil
+	} else if iterador.nodoAnterior == nil {
+		iterador.lista.primero = iterador.nodoActual.siguiente
+		iterador.nodoActual = iterador.lista.primero
+	} else if iterador.nodoActual.siguiente == nil {
+		iterador.lista.ultimo = iterador.nodoAnterior
+		iterador.nodoAnterior.siguiente = nil
+		iterador.nodoActual = nil
+	} else {
+		iterador.nodoAnterior.siguiente = iterador.nodoActual.siguiente
+		iterador.nodoActual = iterador.nodoActual.siguiente
+	}
+	iterador.lista.largo -= 1
+	return aux
 }
 
 func (iterador *Iterador[T]) insertarAlPrincipioDeLista(nodoNuevo *nodo[T]) {
