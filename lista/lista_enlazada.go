@@ -151,19 +151,13 @@ func (iterador *Iterador[T]) Borrar() T {
 	aux := iterador.nodoActual.dato
 
 	if iterador.lista.primero == iterador.lista.ultimo {
-		iterador.lista.primero = nil
-		iterador.lista.ultimo = nil
-		iterador.nodoActual = nil
+		iterador.borrarUnicoElemento()
 	} else if iterador.nodoAnterior == nil {
-		iterador.lista.primero = iterador.nodoActual.siguiente
-		iterador.nodoActual = iterador.lista.primero
+		iterador.borrarPrimerElemento()
 	} else if iterador.nodoActual.siguiente == nil {
-		iterador.lista.ultimo = iterador.nodoAnterior
-		iterador.nodoAnterior.siguiente = nil
-		iterador.nodoActual = nil
+		iterador.borrarUltimoElemento()
 	} else {
-		iterador.nodoAnterior.siguiente = iterador.nodoActual.siguiente
-		iterador.nodoActual = iterador.nodoActual.siguiente
+		iterador.borrarElementoDelMedio()
 	}
 	iterador.lista.largo -= 1
 	return aux
@@ -186,4 +180,26 @@ func (iterador *Iterador[T]) insertarDespuesDeNodoAnterior(nodoNuevo *nodo[T]) {
 	if iterador.nodoActual == nil {
 		iterador.lista.ultimo = nodoNuevo
 	}
+}
+
+func (iterador *Iterador[T]) borrarUnicoElemento() {
+	iterador.lista.primero = nil
+	iterador.lista.ultimo = nil
+	iterador.nodoActual = nil
+}
+
+func (iterador *Iterador[T]) borrarPrimerElemento() {
+	iterador.lista.primero = iterador.nodoActual.siguiente
+	iterador.nodoActual = iterador.lista.primero
+}
+
+func (iterador *Iterador[T]) borrarUltimoElemento() {
+	iterador.lista.ultimo = iterador.nodoAnterior
+	iterador.nodoAnterior.siguiente = nil
+	iterador.nodoActual = nil
+}
+
+func (iterador *Iterador[T]) borrarElementoDelMedio() {
+	iterador.nodoAnterior.siguiente = iterador.nodoActual.siguiente
+	iterador.nodoActual = iterador.nodoActual.siguiente
 }
