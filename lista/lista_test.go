@@ -124,3 +124,8 @@ func TestInsertarYBorrarVolumenNoRompeElPrograma(t *testing.T) {
     lista.VerPrimero()
   })
 }
+
+func TestInsertarPrimeroIterador(t *testing.T){
+  lista:=TDALista.CrearListaEnlazada[int]()
+
+}

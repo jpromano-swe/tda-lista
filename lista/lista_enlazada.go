@@ -187,3 +187,9 @@ func (iterador *Iterador[T]) insertarDespuesDeNodoAnterior(nodoNuevo *nodo[T]) {
 		iterador.lista.ultimo = nodoNuevo
 	}
 }
+
+/*type Iterador[T any] struct {
+	nodoAnterior *nodo[T]
+	nodoActual   *nodo[T]
+	lista        *ListaEnlazada[T]
+}*/
