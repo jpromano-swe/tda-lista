@@ -188,7 +188,7 @@ func (iterador *iterador[T]) borrarUnicoElemento() {
   iterador.nodoActual = nil
 }
 
-func (iterador iterador[T]) borrarPrimerElemento() {
+func (iterador *iterador[T]) borrarPrimerElemento() {
   iterador.lista.primero = iterador.nodoActual.siguiente
   iterador.nodoActual = iterador.lista.primero
 }
