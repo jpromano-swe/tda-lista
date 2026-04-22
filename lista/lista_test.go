@@ -125,7 +125,147 @@ func TestInsertarYBorrarVolumenNoRompeElPrograma(t *testing.T) {
   })
 }
 
-func TestInsertarPrimeroIterador(t *testing.T){
-  lista:=TDALista.CrearListaEnlazada[int]()
+func TestIteradorListaVacia(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  iter := lista.Iterador()
 
+  require.False(t, iter.HayAlgoMas())
+
+  require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+    iter.VerActual()
+  })
+
+  require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+    iter.Avanzar()
+  })
+
+  require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+    iter.Borrar()
+  })
+}
+
+func TestIteradorBorrarUltimoCambiaUltimo(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  lista.InsertarUltimo(3)
+  lista.InsertarUltimo(4)
+  lista.InsertarUltimo(5)
+
+  iter := lista.Iterador()
+  iter.Avanzar()
+  iter.Avanzar()
+
+  require.Equal(t, iter.VerActual(), 5)
+  require.Equal(t, iter.Borrar(), 5)
+
+  require.Equal(t, lista.VerPrimero(), 3)
+  require.Equal(t, lista.VerUltimo(), 4)
+  require.Equal(t, lista.Largo(), 2)
+  require.False(t, iter.HayAlgoMas())
+}
+
+func TestIteradorBorraElementoEnMedio(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  lista.InsertarUltimo(3)
+  lista.InsertarUltimo(4)
+  lista.InsertarUltimo(5)
+
+  iter := lista.Iterador()
+  iter.Avanzar()
+
+  require.Equal(t, iter.VerActual(), 4)
+  require.Equal(t, iter.Borrar(), 4)
+
+  require.Equal(t, lista.Largo(), 2)
+  require.Equal(t, lista.VerPrimero(), 3)
+  require.Equal(t, lista.VerUltimo(), 5)
+  require.Equal(t, iter.VerActual(), 5)
+
+  datosCopiados := []int{}
+
+  lista.Iterar(func(dato int) bool {
+    datosCopiados = append(datosCopiados, dato)
+    return true
+  })
+  require.Equal(t, []int{3, 5}, datosCopiados)
+}
+
+func TestIteradorBorrarUnicoElementoDejaListaVacia(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  lista.InsertarUltimo(3)
+
+  iter := lista.Iterador()
+
+  require.Equal(t, iter.VerActual(), 3)
+  require.Equal(t, iter.Borrar(), 3)
+
+  require.True(t, lista.EstaVacia())
+  require.Equal(t, lista.Largo(), 0)
+  require.False(t, iter.HayAlgoMas())
+
+  require.PanicsWithValue(t, "La lista esta vacia", func() {
+    lista.VerPrimero()
+  })
+  require.PanicsWithValue(t, "La lista esta vacia", func() {
+    lista.VerUltimo()
+  })
+}
+
+func TestIteradorInsertarElementoEnListaVacia(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  iter := lista.Iterador()
+
+  require.False(t, iter.HayAlgoMas())
+
+  iter.Insertar(2)
+  require.False(t, lista.EstaVacia())
+  require.Equal(t, lista.Largo(), 1)
+  require.Equal(t, lista.VerPrimero(), 2)
+  require.Equal(t, lista.VerUltimo(), 2)
+  require.True(t, iter.HayAlgoMas())
+  require.Equal(t, iter.VerActual(), 2)
+}
+
+func TestIteradorInternoEnListaVaciaNoRecorreElementos(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+
+  seUsoIterador := false
+
+  lista.Iterar(func(elem int) bool {
+    seUsoIterador = true
+    return true
+  })
+
+  require.False(t, seUsoIterador)
+}
+
+func TestIteradorInternoRecorreTodosLosElementos(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  lista.InsertarUltimo(3)
+  lista.InsertarUltimo(4)
+  lista.InsertarUltimo(5)
+
+  datosCopiados := []int{}
+
+  lista.Iterar(func(dato int) bool {
+    datosCopiados = append(datosCopiados, dato)
+    return true
+  })
+  require.Equal(t, []int{3, 4, 5}, datosCopiados)
+}
+
+func TestIteradorInternoCortaConCondicion(t *testing.T) {
+  lista := TDALista.CrearListaEnlazada[int]()
+  lista.InsertarUltimo(1)
+  lista.InsertarUltimo(2)
+  lista.InsertarUltimo(3)
+  lista.InsertarUltimo(4)
+  lista.InsertarUltimo(5)
+
+  datosCopiados := []int{}
+
+  lista.Iterar(func(dato int) bool {
+    datosCopiados = append(datosCopiados, dato)
+    return dato != 3
+  })
+  require.Equal(t, []int{1, 2, 3}, datosCopiados)
 }
