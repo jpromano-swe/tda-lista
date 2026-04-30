@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const _volumenPruebas = 100000
+
 func TestNuevaListaComienzaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	require.True(t, lista.EstaVacia())
@@ -106,14 +108,13 @@ func TestInsertarUltimoMantieneElPrimero(t *testing.T) {
 
 func TestInsertarYBorrarVolumenNoRompeElPrograma(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
-	const volumen = 100000
 
-	for i := 0; i < volumen; i++ {
+	for i := 0; i < _volumenPruebas; i++ {
 		lista.InsertarUltimo(i)
 	}
 	require.False(t, lista.EstaVacia())
 
-	for i := 0; i < volumen; i++ {
+	for i := 0; i < _volumenPruebas; i++ {
 		lista.BorrarPrimero()
 	}
 	require.True(t, lista.EstaVacia())
