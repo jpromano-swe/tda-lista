@@ -1,13 +1,13 @@
 package diccionario
 
+
 func (hash *tablaDeHash[K, V]) buscarIndicePorClave(clave K) (int, bool) {
 	indiceInicial := hashingDeClaves(clave, len(hash.tablaHash))
-
 	for i := 0; i < len(hash.tablaHash); i++ {
 		indiceActual := (indiceInicial + i) % len(hash.tablaHash)
 		celdaActual := hash.tablaHash[indiceActual]
 
-		if celdaActual.EstadoDeCelda == _libre {
+		if celdaActual.EstadoDeCelda == _libre || celdaActual.EstadoDeCelda == _borrado {
 			return -1, false
 		}
 
@@ -18,15 +18,13 @@ func (hash *tablaDeHash[K, V]) buscarIndicePorClave(clave K) (int, bool) {
 
 	return -1, false
 }
-
 func (hash *tablaDeHash[K, V]) buscarIndiceParaInsertar(clave K) int {
 	indiceInicial := hashingDeClaves(clave, len(hash.tablaHash))
-
 	for i := 0; i < len(hash.tablaHash); i++ {
 		indiceActual := (indiceInicial + i) % len(hash.tablaHash)
 		celdaActual := hash.tablaHash[indiceActual]
 
-		if celdaActual.EstadoDeCelda == _libre {
+		if celdaActual.EstadoDeCelda == _libre || celdaActual.EstadoDeCelda == _borrado{
 			return indiceActual
 		}
 
@@ -35,6 +33,10 @@ func (hash *tablaDeHash[K, V]) buscarIndiceParaInsertar(clave K) int {
 		}
 	}
 	return -1
+}
+
+func (iter *iteradorHash[K, V]) convertirIndiceEnClave() {
+
 }
 
 func esPrimo(n int) bool {

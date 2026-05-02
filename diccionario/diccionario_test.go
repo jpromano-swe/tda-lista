@@ -508,6 +508,7 @@ func TestIteradorNoLlegaAlFinal(t *testing.T) {
 	iter2.Avanzar()
 	iter3 := dic.Iterador()
 	primero, _ := iter3.VerActual()
+	fmt.Println(primero)
 	iter3.Avanzar()
 	segundo, _ := iter3.VerActual()
 	iter3.Avanzar()
