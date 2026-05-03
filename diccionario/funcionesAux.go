@@ -1,15 +1,5 @@
 package diccionario
 
-func (hash *tablaDeHash[K, V]) encontrarPrimerOcupado() int {
-  i := 0
-  contador := 0
-  for i < hash.capacidad && hash.tablaHash[i].estadoDeCelda != _OCUPADO {
-    i++
-    contador++
-  }
-  return contador
-}
-
 func esPrimo(numero int) bool {
   if numero < 2 {
     return false
