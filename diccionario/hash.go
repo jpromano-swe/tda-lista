@@ -1,6 +1,6 @@
 package diccionario
 
-//key: id
+//key: clave
 //Valor: valor
 //indice: ubicacion en memoria
 
