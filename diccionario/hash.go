@@ -61,18 +61,19 @@ func (hash *tablaDeHash[K, V]) Borrar(clave K) V {
 	}
 	hash.cantidad--
 	hash.tablaHash[indiceActual].estadoDeCelda = _BORRADO
-	if hash.cantidad * 4 <= hash.capacidad && hash.capacidad > _CAPACIDAD_INICIAL{
-		hash.redimensionarDiccionario(hash.capacidad/2)
+	if hash.cantidad*4 <= hash.capacidad && hash.capacidad > _CAPACIDAD_INICIAL {
+		hash.redimensionarDiccionario(hash.capacidad / 2)
 	}
 	return hash.tablaHash[indiceActual].valor
 }
 
 func (hash *tablaDeHash[K, V]) Guardar(clave K, valor V) { //REFACTOR, QUEDO MUY LARGO
 
-	indiceActual := hash.buscarIndiceParaInsertar(clave)
+	indiceActual, clavePertenece := hash.buscarIndice(clave)
 	capacidadActual := len(hash.tablaHash)
 	factorCargado := float64(hash.cantidad+1) / float64(capacidadActual)
-	if hash.tablaHash[indiceActual].estadoDeCelda == _OCUPADO {
+
+	if clavePertenece {
 		hash.tablaHash[indiceActual].valor = valor
 		return
 	}
@@ -80,7 +81,7 @@ func (hash *tablaDeHash[K, V]) Guardar(clave K, valor V) { //REFACTOR, QUEDO MUY
 	if factorCargado > _FACTOR_DE_CARGA {
 		nuevaCapacidad := siguientePrimo(_FACTOR_DE_CRECIMIENTO * capacidadActual)
 		hash.redimensionarDiccionario(nuevaCapacidad)
-		indiceActual = hash.buscarIndiceParaInsertar(clave)
+		indiceActual, _ = hash.buscarIndice(clave)
 	}
 
 	hash.tablaHash[indiceActual].clave = clave
@@ -135,6 +136,39 @@ func (iter *iteradorHash[K, V]) Avanzar() {
 	iter.posicion++
 }
 
+func (hash *tablaDeHash[K, V]) buscarIndice(clave K) (int, bool) {
+	indiceInicial := hashingDeClaves(clave, len(hash.tablaHash))
+	hayPrimerBorrado := false
+	indicePrimerBorrado := 0
+
+	for i := 0; i < len(hash.tablaHash); i++ {
+		indiceActual := (indiceInicial + i) % len(hash.tablaHash)
+		celdaActual := hash.tablaHash[indiceActual]
+
+		switch celdaActual.estadoDeCelda {
+		case _BORRADO:
+			if !hayPrimerBorrado {
+				hayPrimerBorrado = true
+				indicePrimerBorrado = indiceActual
+			}
+		case _LIBRE:
+			if hayPrimerBorrado {
+				return indicePrimerBorrado, false
+			}
+			return indiceActual, false
+
+		case _OCUPADO:
+			if celdaActual.clave == clave {
+				return indiceActual, true
+			}
+		}
+	}
+	if hayPrimerBorrado {
+		return indicePrimerBorrado, false
+	}
+	return -1, false
+}
+
 func (hash *tablaDeHash[K, V]) redimensionarDiccionario(nuevaCapacidad int) {
 	tablaActual := hash.tablaHash
 	hash.tablaHash = make([]celdaDiccionario[K, V], nuevaCapacidad)
@@ -142,7 +176,7 @@ func (hash *tablaDeHash[K, V]) redimensionarDiccionario(nuevaCapacidad int) {
 	hash.capacidad = nuevaCapacidad
 	for i := 0; i < len(tablaActual); i++ {
 		if tablaActual[i].estadoDeCelda == _OCUPADO {
-			indiceActual := hash.buscarIndiceParaInsertar(tablaActual[i].clave)
+			indiceActual := hash.buscarIndice(tablaActual[i].clave)
 			hash.tablaHash[indiceActual].clave = tablaActual[i].clave
 			hash.tablaHash[indiceActual].valor = tablaActual[i].valor
 			hash.tablaHash[indiceActual].estadoDeCelda = _OCUPADO
