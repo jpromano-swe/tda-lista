@@ -5,7 +5,7 @@ package diccionario
 //indice: ubicacion en memoria
 
 const (
-	_LIBRE EstadoDeCelda = iota
+	_LIBRE estadoDeCelda = iota
 	_OCUPADO
 	_BORRADO
 
@@ -14,7 +14,7 @@ const (
 	_FACTOR_DE_CARGA       = 0.7
 )
 
-type EstadoDeCelda = int
+type estadoDeCelda = int
 
 type tablaDeHash[K comparable, V any] struct {
 	tablaHash []celdaDiccionario[K, V]
@@ -23,9 +23,9 @@ type tablaDeHash[K comparable, V any] struct {
 }
 
 type celdaDiccionario[K comparable, V any] struct {
-	clave K
-	valor V
-	EstadoDeCelda
+	clave         K
+	valor         V
+	estadoDeCelda int
 }
 type iteradorHash[K comparable, V any] struct {
 	hashPasado   *tablaDeHash[K, V]
@@ -60,7 +60,10 @@ func (hash *tablaDeHash[K, V]) Borrar(clave K) V {
 		panic("La clave no pertenece al diccionario")
 	}
 	hash.cantidad--
-	hash.tablaHash[indiceActual].EstadoDeCelda = _BORRADO
+	hash.tablaHash[indiceActual].estadoDeCelda = _BORRADO
+	if hash.cantidad * 4 <= hash.capacidad && hash.capacidad > _CAPACIDAD_INICIAL{
+		hash.redimensionarDiccionario(hash.capacidad/2)
+	}
 	return hash.tablaHash[indiceActual].valor
 }
 
@@ -69,7 +72,7 @@ func (hash *tablaDeHash[K, V]) Guardar(clave K, valor V) { //REFACTOR, QUEDO MUY
 	indiceActual := hash.buscarIndiceParaInsertar(clave)
 	capacidadActual := len(hash.tablaHash)
 	factorCargado := float64(hash.cantidad+1) / float64(capacidadActual)
-	if hash.tablaHash[indiceActual].EstadoDeCelda == _OCUPADO {
+	if hash.tablaHash[indiceActual].estadoDeCelda == _OCUPADO {
 		hash.tablaHash[indiceActual].valor = valor
 		return
 	}
@@ -82,7 +85,7 @@ func (hash *tablaDeHash[K, V]) Guardar(clave K, valor V) { //REFACTOR, QUEDO MUY
 
 	hash.tablaHash[indiceActual].clave = clave
 	hash.tablaHash[indiceActual].valor = valor
-	hash.tablaHash[indiceActual].EstadoDeCelda = _OCUPADO
+	hash.tablaHash[indiceActual].estadoDeCelda = _OCUPADO
 	hash.cantidad++
 }
 
@@ -96,7 +99,7 @@ func (hash *tablaDeHash[K, V]) Iterar(visitar func(clave K, dato V) bool) {
 	indice := hash.encontrarPrimerOcupado()
 	cantidad := 0
 	for indice < hash.capacidad && cantidad < hash.cantidad {
-		if hash.tablaHash[indice].EstadoDeCelda == _OCUPADO {
+		if hash.tablaHash[indice].estadoDeCelda == _OCUPADO {
 			cantidad++
 			if !visitar(hash.tablaHash[indice].clave, hash.tablaHash[indice].valor) {
 				return
@@ -126,7 +129,7 @@ func (iter *iteradorHash[K, V]) Avanzar() {
 		panic("El iterador termino de iterar")
 	}
 	iter.indiceActual++
-	for iter.indiceActual < iter.hashPasado.capacidad && iter.hashPasado.tablaHash[iter.indiceActual].EstadoDeCelda != _OCUPADO {
+	for iter.indiceActual < iter.hashPasado.capacidad && iter.hashPasado.tablaHash[iter.indiceActual].estadoDeCelda != _OCUPADO {
 		iter.indiceActual++
 	}
 	iter.posicion++
@@ -138,11 +141,11 @@ func (hash *tablaDeHash[K, V]) redimensionarDiccionario(nuevaCapacidad int) {
 	hash.cantidad = 0
 	hash.capacidad = nuevaCapacidad
 	for i := 0; i < len(tablaActual); i++ {
-		if tablaActual[i].EstadoDeCelda == _OCUPADO {
+		if tablaActual[i].estadoDeCelda == _OCUPADO {
 			indiceActual := hash.buscarIndiceParaInsertar(tablaActual[i].clave)
 			hash.tablaHash[indiceActual].clave = tablaActual[i].clave
 			hash.tablaHash[indiceActual].valor = tablaActual[i].valor
-			hash.tablaHash[indiceActual].EstadoDeCelda = _OCUPADO
+			hash.tablaHash[indiceActual].estadoDeCelda = _OCUPADO
 			hash.cantidad++
 		}
 	}
