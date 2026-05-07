@@ -1,5 +1,11 @@
 package diccionario
 
+import TDAPila "tdas/pila"
+
+const (
+  _ERROR_ITERADOR = "El iterador termino de iterar"
+)
+
 type abb[K comparable, V any] struct {
   raiz     *nodo[K, V]
   cantidad int
@@ -11,6 +17,13 @@ type nodo[K comparable, V any] struct {
   dato     V
   arbolIzq *nodo[K, V]
   arbolDer *nodo[K, V]
+}
+
+type iteradorABB[K comparable, V any] struct {
+  pilaNodos  TDAPila.Pila[any]
+  inicio     *K
+  fin        *K
+  comparador func(K, K) int
 }
 
 func CrearABB[K comparable, V any](funcion_cmp func(K, K) int) DiccionarioOrdenado[K, V] {
@@ -31,7 +44,75 @@ func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, da
 }
 
 func (arbol *abb[K, V]) Iterar(visitar func(clave K, dato V) bool) {
-  arbol._iterarRango(arbol.raiz, nil, nil, visitar)
+  arbol.IterarRango(nil, nil, visitar)
+}
+
+func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
+  return arbol.IteradorRango(nil, nil)
+}
+
+func (iter *iteradorABB[K, V]) HayAlgoMas() bool {
+  if iter.pilaNodos.EstaVacia() {
+    return false
+  }
+  if iter.fin == nil {
+    return true
+  }
+  claveActual := iter.pilaNodos.VerTope().(*nodo[K, V]).clave
+  return iter.comparador(claveActual, *iter.fin) <= 0
+}
+
+func (iter *iteradorABB[K, V]) Avanzar() {
+  if !iter.HayAlgoMas() {
+    panic(_ERROR_ITERADOR)
+  }
+  nodoActual := iter.pilaNodos.VerTope().(*nodo[K, V])
+  iter.pilaNodos.Desapilar()
+  if nodoActual.arbolDer != nil {
+    iter.apilarRamaIzq(nodoActual.arbolDer)
+  }
+}
+
+func (iter *iteradorABB[K, V]) VerActual() (K, V) {
+  if !iter.HayAlgoMas() {
+    panic(_ERROR_ITERADOR)
+  }
+  nodoActual := iter.pilaNodos.VerTope().(*nodo[K, V])
+  return nodoActual.clave, nodoActual.dato
+}
+
+func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
+  iter := iteradorABB[K, V]{
+    pilaNodos:  TDAPila.CrearPilaDinamica[any](),
+    inicio:     desde,
+    fin:        hasta,
+    comparador: arbol.cmp,
+  }
+  iter.apilarRango(arbol.raiz)
+  return &iter
+}
+
+func (iter *iteradorABB[K, V]) apilarRamaIzq(nodoActual *nodo[K, V]) {
+  for nodoActual != nil {
+    iter.pilaNodos.Apilar(nodoActual)
+    nodoActual = nodoActual.arbolIzq
+  }
+}
+
+func (iter *iteradorABB[K, V]) apilarRango(nodoActual *nodo[K, V]) {
+  if iter.inicio == nil {
+    iter.apilarRamaIzq(nodoActual)
+    return
+  }
+  for nodoActual != nil {
+    claveActual := nodoActual.clave
+    if iter.comparador(claveActual, *iter.inicio) < 0 {
+      nodoActual = nodoActual.arbolDer
+    } else {
+      iter.pilaNodos.Apilar(nodoActual)
+      nodoActual = nodoActual.arbolIzq
+    }
+  }
 }
 
 func (arbol *abb[K, V]) _iterarRango(nodoActual *nodo[K, V], desde *K, hasta *K, visitar func(clave K, dato V) bool) bool {
