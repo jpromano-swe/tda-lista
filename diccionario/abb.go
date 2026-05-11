@@ -3,7 +3,8 @@ package diccionario
 import TDAPila "tdas/pila"
 
 const (
-  _ERROR_ITERADOR = "El iterador termino de iterar"
+  _ERROR_ITERADOR            = "El iterador termino de iterar"
+  _ERROR_CLAVE_NO_ENCONTRADA = "La clave no se encuentra al diccionario"
 )
 
 type abb[K comparable, V any] struct {
@@ -39,6 +40,86 @@ func crearNodo[K comparable, V any](elem any) *nodo[K, V] {
   }
   return &nuevoNodo
 }
+
+func (arbol *abb[K, V]) Borrar(clave K) V {
+  nodoABorrar := arbol.buscarNodo(clave)
+
+  if nodoABorrar == nil {
+    panic(_ERROR_CLAVE_NO_ENCONTRADA)
+  }
+  nodoActual := *nodoABorrar
+  datoElemento := nodoActual.dato
+
+  if nodoActual.arbolIzq == nil && nodoActual.arbolDer == nil {
+    arbol.borrarHoja(nodoABorrar)
+  } else if nodoActual.arbolIzq != nil && nodoActual.arbolDer != nil {
+    arbol.borrarNodoConDosHijos(nodoABorrar)
+  } else {
+    arbol.borrarNodoConUnHijo(nodoABorrar)
+  }
+  arbol.cantidad--
+  return datoElemento
+}
+
+func (arbol *abb[K, V]) borrarHoja(nodoHoja **nodo[K, V]) {
+  *nodoHoja = nil
+}
+
+func (arbol *abb[K, V]) borrarNodoConUnHijo(nodoABorrar **nodo[K, V]) {
+  nodoActual := *nodoABorrar
+
+  if nodoActual.arbolIzq != nil {
+    *nodoABorrar = nodoActual.arbolIzq
+  } else {
+    *nodoABorrar = nodoActual.arbolDer
+  }
+}
+
+func (arbol *abb[K, V]) borrarNodoConDosHijos(nodoABorrar **nodo[K, V]) {
+  nodoActual := *nodoABorrar
+  nodoAReemplazar := arbol.buscarMaximo(&(nodoActual.arbolIzq))
+
+  if nodoAReemplazar == nil {
+    panic("El nodo a reemplazar es invalido")
+  }
+  nodoReemplazo := *nodoAReemplazar
+
+  nodoActual.clave = nodoReemplazo.clave
+  nodoActual.dato = nodoReemplazo.dato
+
+  if nodoReemplazo.arbolIzq != nil {
+    arbol.borrarNodoConUnHijo(nodoAReemplazar)
+  } else {
+    arbol.borrarHoja(nodoAReemplazar)
+  }
+}
+
+func (arbol *abb[K, V]) buscarMaximo(elemento **nodo[K, V]) **nodo[K, V] {
+  if *elemento == nil {
+    return nil
+  }
+  for (*elemento).arbolDer != nil {
+    elemento = &(*elemento).arbolDer
+  }
+  return elemento
+}
+
+func (arbol *abb[K, V]) buscarNodo(clave K) **nodo[K, V] {
+  enlace := &arbol.raiz
+
+  for *enlace != nil {
+    elementoActual := *enlace
+    if arbol.cmp(clave, elementoActual.clave) == 0 {
+      return enlace
+    } else if arbol.cmp(clave, elementoActual.clave) > 0 {
+      enlace = &elementoActual.arbolDer
+    } else {
+      enlace = &elementoActual.arbolIzq
+    }
+  }
+  return nil
+}
+
 func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
   arbol._iterarRango(arbol.raiz, desde, hasta, visitar)
 }
