@@ -1,5 +1,3 @@
-//FALTA IMPLEMENTAR EL CMP DE STRUCTS
-
 package diccionario_test
 
 import (
@@ -21,10 +19,6 @@ func compararInt(valorA, valorB int) int {
 		return -1
 	}
 	return 0
-}
-
-func compararStructs(valorA, valorB) {
-
 }
 
 func TestABBDiccionarioVacio(t *testing.T) {
@@ -191,7 +185,27 @@ func TestABBConClavesStructs(t *testing.T) {
 		z string
 	}
 
-	dic := TDADiccionario.CrearABB[avanzado, int]()
+	compararBasico := func(valorA, valorB basico) int {
+		if strings.Compare(valorA.a, valorB.a) != 0 {
+			return strings.Compare(valorA.a, valorB.a)
+		}
+		return compararInt(valorA.b, valorB.b)
+	}
+
+	compararStructs := func(valorA, valorB avanzado) int {
+		if compararInt(valorA.w, valorB.w) != 0 {
+			return compararInt(valorA.w, valorB.w)
+		}
+		if strings.Compare(valorA.z, valorB.z) != 0 {
+			return strings.Compare(valorA.z, valorB.z)
+		}
+		if compararBasico(valorA.x, valorB.x) != 0 {
+			return compararBasico(valorA.x, valorB.x)
+		}
+		return compararBasico(valorA.y, valorB.y)
+	}
+
+	dic := TDADiccionario.CrearABB[avanzado, int](compararStructs)
 
 	a1 := avanzado{w: 10, z: "hola", x: basico{a: "mundo", b: 8}, y: basico{a: "!", b: 10}}
 	a2 := avanzado{w: 10, z: "aloh", x: basico{a: "odnum", b: 14}, y: basico{a: "!", b: 5}}
@@ -374,7 +388,7 @@ func BenchmarkDiccionarioABB(b *testing.B) {
 	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ejecutarPruebaVolumen(b, n)
+				ejecutarPruebaVolumenABB(b, n)
 			}
 		})
 	}
@@ -455,20 +469,20 @@ func TestABBIteradorConRangoCompleto(t *testing.T) {
 	dic := TDADiccionario.CrearABB[string, int](strings.Compare)
 
 	dic.Guardar("Perro", 1)
-	dic.Guardar("Gato", 1)
-	dic.Guardar("Vaca", 1)
+	dic.Guardar("Gato", 2)
+	dic.Guardar("Vaca", 3)
 
 	iter := dic.IteradorRango(nil, nil)
 
 	require.True(t, iter.HayAlgoMas())
 	clave, valor := iter.VerActual()
-	require.EqualValues(t, "Perro", clave)
-	require.EqualValues(t, 1, valor)
+	require.EqualValues(t, "Gato", clave)
+	require.EqualValues(t, 2, valor)
 	iter.Avanzar()
 	require.True(t, iter.HayAlgoMas())
 	clave, valor = iter.VerActual()
-	require.EqualValues(t, "Gato", clave)
-	require.EqualValues(t, 2, valor)
+	require.EqualValues(t, "Perro", clave)
+	require.EqualValues(t, 1, valor)
 	iter.Avanzar()
 	require.True(t, iter.HayAlgoMas())
 	clave, valor = iter.VerActual()
@@ -581,7 +595,7 @@ func TestABBIteradorRangoDesdeHasta(t *testing.T) {
 }
 
 func TestABBIteradorRangoMalDefinido(t *testing.T) {
-	t.Log("Chequea que IteradorRango con desde y hasta mal definidos tire panics")
+	t.Log("Chequea que IteradorRango con desde y hasta mal definidos, es decir, sin elementos en el, tire panics")
 	dic := TDADiccionario.CrearABB[string, int](strings.Compare)
 
 	dic.Guardar("A", 1)
@@ -598,7 +612,7 @@ func TestABBIteradorRangoMalDefinido(t *testing.T) {
 }
 
 func TestABBIteradorRangoConUnUnicoElemento(t *testing.T) {
-	t.Log("Chequea que IteradorRango con desde y hasta mal definidos tire panics")
+	t.Log("Chequea que IteradorRango con desde y hasta iguales devuelve ese unico elemento si pertence al diccionario")
 	dic := TDADiccionario.CrearABB[string, int](strings.Compare)
 	dic.Guardar("J", 10)
 
@@ -696,7 +710,7 @@ func BenchmarkIteradorABB(b *testing.B) {
 	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ejecutarPruebasVolumenIterador(b, n)
+				ejecutarPruebasVolumenIteradorABB(b, n)
 			}
 		})
 	}
