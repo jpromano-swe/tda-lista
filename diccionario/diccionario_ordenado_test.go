@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var TAMS_VOLUMEN_ABB = []int{12500, 25000, 50000, 100000, 200000, 400000}
+var TAMS_VOLUMEN_ABB = []int{500, 1000, 2000, 3000, 5000, 7500}
 
 func compararInt(valorA, valorB int) int {
 	if valorA > valorB {
