@@ -1,4 +1,4 @@
-package cola_prioridad
+package heap
 
 type ColaPrioridad[T any] interface {
 
