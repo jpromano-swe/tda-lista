@@ -16,7 +16,7 @@ type heapDinamico[T any] struct {
 func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
   heap := new(heapDinamico[T])
   heap.datos = make([]T, 0)
-  heap.cantidad = 0
+  heap.cantidad = _CAPACIDAD_INICIAL
   heap.cmp = funcion_cmp
   return heap
 
@@ -34,10 +34,16 @@ func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[
 }
 
 func (heap *heapDinamico[T]) EstaVacia() bool {
-  return heap.cantidad == 0
+  return len(heap.datos) == 0
 }
 
 func (heap *heapDinamico[T]) Encolar(elemento T) {
+  if (len(heap.datos)+1) == heap.cantidad{
+    heap.cantidad = heap.cantidad * _FACTOR_DE_CRECIMIENTO
+    heap.redimensionar(heap.cantidad)
+  }
+  heap.datos[len(heap.datos)-1] = elemento
+  heap.upheap(len(heap.datos)-1)
 }
 
 func (heap *heapDinamico[T]) VerMax() T {
@@ -45,6 +51,9 @@ func (heap *heapDinamico[T]) VerMax() T {
     panic(_ERROR_HEAP_VACIO)
   }
   return heap.datos[0]
+}
+func (heap *heapDinamico[T]) Cantidad() int {
+  return len(heap.datos)
 }
 
 func (heap *heapDinamico[T]) Desencolar() T {
@@ -68,24 +77,28 @@ func (heap *heapDinamico[T]) _desencolar(ini, fin int) T {
   return maximoDelHeap
 }
 
-func (heap *heapDinamico[T]) Cantidad() int {
-
-}
 
 func (heap *heapDinamico[T]) upheap(pos int) {
-
-}
+  if heap.cmp(heap.datos[pos], heap.datos[(pos-1)/2]) <= 0{
+    return
+  }
+  if heap.cmp(heap.datos[pos], heap.datos[(pos-1)/2]) > 0{
+   heap.datos[pos], heap.datos[(pos-1)/2] =  heap.datos[(pos-1)/2], heap.datos[pos]
+  }
+  heap.upheap((pos-1)/2)
+} 
 
 func (heap *heapDinamico[T]) downheap(pos int) {
 
 }
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
-
+  
 }
 
 func (heap *heapDinamico[T]) redimensionar(nuevaCapacidad int) {
   nuevosDatos := make([]T, nuevaCapacidad)
   copy(nuevosDatos, heap.datos[:heap.cantidad])
   heap.datos = nuevosDatos
+  
 }
